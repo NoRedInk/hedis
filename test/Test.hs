@@ -27,7 +27,7 @@ main :: IO ()
 main = do
     conn <- connectCluster defaultConnectInfo {
             connectPort = PortNumber 7000
-        }  
+        }
     Test.defaultMain (tests conn)
 
 type Test = Connection -> Test.Test
@@ -125,14 +125,14 @@ testEvalReplies :: Test
 testEvalReplies conn = testCase "eval unused replies" go conn
   where
     go = do
-      _ignored <- set "{1}k1" "value"
-      (liftIO $ do
+      _ <- liftIO $ runRedis conn $ set "key" "value"
+      result <- liftIO $ do
          threadDelay $ 10 ^ (5 :: Int)
          mvar <- newEmptyMVar
          _ <-
-           (Async.wait =<< Async.async (runRedis conn (get "{1}k1"))) >>= putMVar mvar
+           (Async.wait =<< Async.async (runRedis conn (get "key"))) >>= putMVar mvar
          takeMVar mvar
-         ) >>=? Just "value"
+      pure result >>=? Just "value"
 
 ------------------------------------------------------------------------------
 -- Keys
