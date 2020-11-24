@@ -39,6 +39,7 @@ testCase name r conn = Test.testCase name $ do
     resetDB = do
         del ["key"]
         del ["set"]
+        del ["{9}key", "{9}key'"]
         del ["{1}set", "{1}set'"]
         del ["{1}s1", "{1}s2", "{1}s3"]
         del ["{1}hll1", "{1}hll2", "{1}hll3"]
@@ -66,7 +67,7 @@ assert = liftIO . HUnit.assert
 --
 tests :: Connection -> [Test.Test]
 tests conn = map ($conn) $ concat
-    [ testsMisc, testsStrings, [testHashes], testsLists, testsSets, [testHyperLogLog]
+    [ testsMisc, testsKeys, testsStrings, [testHashes], testsLists, testsSets, [testHyperLogLog]
     , testsZSets, [testPubSub], [testTransaction], [testScripting]
     , testsServer, [testScans], [testZrangelex]
     -- NOTE: not supported in a redis cluster
@@ -141,31 +142,32 @@ testsKeys = [ testKeys, testExpireAt, testSort, testGetType, testObject ]
 
 testKeys :: Test
 testKeys = testCase "keys" $ do
-    set "key" "value"     >>=? Ok
-    get "key"             >>=? Just "value"
-    exists "key"          >>=? True
-    keys "*"              >>=? ["key"]
-    randomkey             >>=? Just "key"
-    move "key" 13         >>=? True
-    select 13             >>=? Ok
-    expire "key" 1        >>=? True
-    pexpire "key" 1000    >>=? True
-    ttl "key" >>= \case
+    set "{9}key" "value"     >>=? Ok
+    get "{9}key"             >>=? Just "value"
+    exists "{9}key"          >>=? True
+    keys "{9}k*"            >>=? ["{9}key"]
+    -- NOTE randomkey, move and select can't be tested in a cluster
+    -- randomkey             >>=? Just "key"
+    -- move "{9}key" 13         >>=? True
+    -- select 13             >>=? Ok
+    expire "{9}key" 1        >>=? True
+    pexpire "{9}key" 1000    >>=? True
+    ttl "{9}key" >>= \case
       Left _ -> error "error"
       Right t -> do
         assert $ t `elem` [0..1]
-        pttl "key" >>= \case
+        pttl "{9}key" >>= \case
           Left _ -> error "error"
           Right pt -> do
             assert $ pt `elem` [990..1000]
-            persist "key"         >>=? True
-            dump "key" >>= \case
+            persist "{9}key"         >>=? True
+            dump "{9}key" >>= \case
               Left _ -> error "impossible"
               Right s -> do
-                restore "key'" 0 s    >>=? Ok
-                rename "key" "key'"   >>=? Ok
-                renamenx "key'" "key" >>=? True
-                del ["key"]           >>=? 1
+                restore "{9}key'" 0 s    >>=? Ok
+                rename "{9}key" "{9}key'"   >>=? Ok
+                renamenx "{9}key'" "{9}key" >>=? True
+                del ["{9}key"]           >>=? 1
                 select 0              >>=? Ok
 
 testExpireAt :: Test
