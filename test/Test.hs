@@ -25,7 +25,9 @@ import PubSubTest
 --
 main :: IO ()
 main = do
-    conn <- connect defaultConnectInfo
+    conn <- connectCluster defaultConnectInfo {
+            connectPort = PortNumber 7000
+        }  
     Test.defaultMain (tests conn)
 
 type Test = Connection -> Test.Test
@@ -56,10 +58,11 @@ assert = liftIO . HUnit.assert
 --
 tests :: Connection -> [Test.Test]
 tests conn = map ($conn) $ concat
-    [ testsMisc, testsKeys, testsStrings, [testHashes], testsLists, testsSets, [testHyperLogLog]
+    [ testsMisc, testsStrings, [testHashes], testsLists, testsSets, [testHyperLogLog]
     , testsZSets, [testPubSub], [testTransaction], [testScripting]
-    , testsConnection, testsServer, [testScans], [testZrangelex]
-    , [testXAddRead, testXReadGroup, testXRange, testXpending, testXClaim, testXInfo, testXDel, testXTrim]
+    , testsServer, [testScans], [testZrangelex]
+    -- NOTE: not supported in a redis cluster
+    -- , [testXAddRead, testXReadGroup, testXRange, testXpending, testXClaim, testXInfo, testXDel, testXTrim]
     , testPubSubThreaded
       -- should always be run last as connection gets closed after it
     , [testQuit]
@@ -565,7 +568,7 @@ testSelect = testCase "select" $ do
 --
 testsServer :: [Test]
 testsServer =
-    [testServer, testBgrewriteaof, testFlushall, testInfo, testConfig
+    [testServer, testBgrewriteaof, testFlushall, testInfo
     ,testSlowlog, testDebugObject]
 
 testServer :: Test

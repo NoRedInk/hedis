@@ -147,8 +147,6 @@ test-suite hedis-test
     -- We use -O0 here, since GHC takes *very* long to compile so many constants
     ghc-options: -O0 -Wall -rtsopts -fno-warn-unused-do-bind
     if flag(dev)
-      ghc-options: -Werror
-    if flag(dev)
       ghc-prof-options: -auto-all
 
 test-suite doctest
