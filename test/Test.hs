@@ -34,8 +34,16 @@ type Test = Connection -> Test.Test
 
 testCase :: String -> Redis () -> Test
 testCase name r conn = Test.testCase name $ do
-    withTimeLimit 0.5 $ runRedis conn $ flushdb >>=? Ok >> r
+    withTimeLimit 0.5 $ runRedis conn $ resetDB >> r
   where
+    resetDB = do
+        del ["key"]
+        del ["set"]
+        del ["{1}set", "{1}set'"]
+        del ["{1}s1", "{1}s2", "{1}s3"]
+        del ["{1}hll1", "{1}hll2", "{1}hll3"]
+        del ["hash"]
+        del ["{1}k1", "{1}k2", "{1}k3"]
     withTimeLimit limit act = do
         start <- getCurrentTime
         _ <- act
