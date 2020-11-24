@@ -230,36 +230,37 @@ testsStrings = [testStrings, testBitops]
 
 testStrings :: Test
 testStrings = testCase "strings" $ do
-    setnx "key" "value"               >>=? True
-    getset "key" "hello"              >>=? Just "value"
-    append "key" "world"              >>=? 10
-    strlen "key"                      >>=? 10
-    setrange "key" 0 "hello"          >>=? 10
-    getrange "key" 0 4                >>=? "hello"
-    mset [("k1","v1"), ("k2","v2")]   >>=? Ok
-    msetnx [("k1","v1"), ("k2","v2")] >>=? False
-    mget ["key"]                      >>=? [Just "helloworld"]
-    setex "key" 1 "42"                >>=? Ok
-    psetex "key" 1000 "42"            >>=? Ok
-    decr "key"                        >>=? 41
-    decrby "key" 1                    >>=? 40
-    incr "key"                        >>=? 41
-    incrby "key" 1                    >>=? 42
-    incrbyfloat "key" 1               >>=? 43
-    del ["key"]                       >>=? 1
-    setbit "key" 42 "1"               >>=? 0
-    getbit "key" 42                   >>=? 1
-    bitcount "key"                    >>=? 1
-    bitcountRange "key" 0 (-1)        >>=? 1
+    setnx "key" "value"                     >>=? True
+    setnx "key" "value"                     >>=? False
+    getset "key" "hello"                    >>=? Just "value"
+    append "key" "world"                    >>=? 10
+    strlen "key"                            >>=? 10
+    setrange "key" 0 "hello"                >>=? 10
+    getrange "key" 0 4                      >>=? "hello"
+    mset [("{1}k1","v1"), ("{1}k2","v2")]   >>=? Ok
+    msetnx [("{1}k1","v1"), ("{1}k2","v2")] >>=? False
+    mget ["key"]                            >>=? [Just "helloworld"]
+    setex "key" 1 "42"                      >>=? Ok
+    psetex "key" 1000 "42"                  >>=? Ok
+    decr "key"                              >>=? 41
+    decrby "key" 1                          >>=? 40
+    incr "key"                              >>=? 41
+    incrby "key" 1                          >>=? 42
+    incrbyfloat "key" 1                     >>=? 43
+    del ["key"]                             >>=? 1
+    setbit "key" 42 "1"                     >>=? 0
+    getbit "key" 42                         >>=? 1
+    bitcount "key"                          >>=? 1
+    bitcountRange "key" 0 (-1)              >>=? 1
 
 testBitops :: Test
 testBitops = testCase "bitops" $ do
-    set "k1" "a"               >>=? Ok
-    set "k2" "b"               >>=? Ok
-    bitopAnd "k3" ["k1", "k2"] >>=? 1
-    bitopOr "k3" ["k1", "k2"]  >>=? 1
-    bitopXor "k3" ["k1", "k2"] >>=? 1
-    bitopNot "k3" "k1"         >>=? 1
+    set "{1}k1" "a"                     >>=? Ok
+    set "{1}k2" "b"                     >>=? Ok
+    bitopAnd "{1}k3" ["{1}k1", "{1}k2"] >>=? 1
+    bitopOr "{1}k3" ["{1}k1", "{1}k2"]  >>=? 1
+    bitopXor "{1}k3" ["{1}k1", "{1}k2"] >>=? 1
+    bitopNot "{1}k3" "{1}k1"            >>=? 1
 
 ------------------------------------------------------------------------------
 -- Hashes
@@ -329,7 +330,7 @@ testSets = testCase "sets" $ do
     srandmember "set"           >>=? Just "member"
     spop "set"                  >>=? Just "member"
     srem "set" ["member"]       >>=? 0
-    smove "set" "set'" "member" >>=? False
+    smove "{1}set" "{1}set'" "member" >>=? False
     _ <- sadd "set" ["member1", "member2"]
     (fmap L.sort <$> spopN "set" 2) >>=? ["member1", "member2"]
     _ <- sadd "set" ["member1", "member2"]
@@ -337,13 +338,13 @@ testSets = testCase "sets" $ do
 
 testSetAlgebra :: Test
 testSetAlgebra = testCase "set algebra" $ do
-    sadd "s1" ["member"]          >>=? 1
-    sdiff ["s1", "s2"]            >>=? ["member"]
-    sunion ["s1", "s2"]           >>=? ["member"]
-    sinter ["s1", "s2"]           >>=? []
-    sdiffstore "s3" ["s1", "s2"]  >>=? 1
-    sunionstore "s3" ["s1", "s2"] >>=? 1
-    sinterstore "s3" ["s1", "s2"] >>=? 0
+    sadd "{1}s1" ["member"]          >>=? 1
+    sdiff ["{1}s1", "{1}s2"]            >>=? ["member"]
+    sunion ["{1}s1", "{1}s2"]           >>=? ["member"]
+    sinter ["{1}s1", "{1}s2"]           >>=? []
+    sdiffstore "{1}s3" ["{1}s1", "{1}s2"]  >>=? 1
+    sunionstore "{1}s3" ["{1}s1", "{1}s2"] >>=? 1
+    sinterstore "{1}s3" ["{1}s1", "{1}s2"] >>=? 0
 
 ------------------------------------------------------------------------------
 -- Sorted Sets
@@ -400,32 +401,32 @@ testZStore = testCase "zunionstore/zinterstore" $ do
 testHyperLogLog :: Test
 testHyperLogLog = testCase "hyperloglog" $ do
   -- test creation
-  pfadd "hll1" ["a"] >>= \case
+  pfadd "{1}hll1" ["a"] >>= \case
       Left _ -> error "error"
       _ -> return ()
-  pfcount ["hll1"] >>=? 1
+  pfcount ["{1}hll1"] >>=? 1
   -- test cardinality
-  pfadd "hll1" ["a"] >>= \case
+  pfadd "{1}hll1" ["a"] >>= \case
       Left _ -> error "error"
       _ -> return ()
-  pfcount ["hll1"] >>=? 1
-  pfadd "hll1" ["b", "c", "foo", "bar"] >>= \case
+  pfcount ["{1}hll1"] >>=? 1
+  pfadd "{1}hll1" ["b", "c", "foo", "bar"] >>= \case
       Left _ -> error "error"
       _ -> return ()
-  pfcount ["hll1"] >>=? 5
+  pfcount ["{1}hll1"] >>=? 5
   -- test merge
-  pfadd "hll2" ["1", "2", "3"] >>= \case
+  pfadd "{1}hll2" ["1", "2", "3"] >>= \case
       Left _ -> error "error"
       _ -> return ()
-  pfadd "hll3" ["4", "5", "6"] >>= \case
+  pfadd "{1}hll3" ["4", "5", "6"] >>= \case
       Left _ -> error "error"
       _ -> return ()
-  pfmerge "hll4" ["hll2", "hll3"] >>= \case
+  pfmerge "{1}hll4" ["{1}hll2", "{1}hll3"] >>= \case
       Left _ -> error "error"
       _ -> return ()
-  pfcount ["hll4"] >>=? 6
+  pfcount ["{1}hll4"] >>=? 6
   -- test union cardinality
-  pfcount ["hll2", "hll3"] >>=? 6
+  pfcount ["{1}hll2", "{1}hll3"] >>=? 6
 
 ------------------------------------------------------------------------------
 -- Pub/Sub
@@ -463,7 +464,7 @@ testPubSub conn = testCase "pubSub" go conn
 --
 testTransaction :: Test
 testTransaction = testCase "transaction" $ do
-    watch ["k1", "k2"] >>=? Ok
+    watch ["{1}k1", "{1}k2"] >>=? Ok
     unwatch            >>=? Ok
     set "foo" "foo" >>= \case
       Left _ -> error "error"
