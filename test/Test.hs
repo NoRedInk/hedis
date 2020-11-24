@@ -385,16 +385,16 @@ testZSets = testCase "sorted sets" $ do
 
 testZStore :: Test
 testZStore = testCase "zunionstore/zinterstore" $ do
-    zadd "k1" [(1, "v1"), (2, "v2")] >>= \case
+    zadd "{1}k1" [(1, "v1"), (2, "v2")] >>= \case
       Left _ -> error "error"
       _ -> return ()
-    zadd "k2" [(2, "v2"), (3, "v3")] >>= \case
+    zadd "{1}k2" [(2, "v2"), (3, "v3")] >>= \case
       Left _ -> error "error"
       _ -> return ()
-    zinterstore "newkey" ["k1","k2"] Sum                >>=? 1
-    zinterstoreWeights "newkey" [("k1",1),("k2",2)] Max >>=? 1
-    zunionstore "newkey" ["k1","k2"] Sum                >>=? 3
-    zunionstoreWeights "newkey" [("k1",1),("k2",2)] Min >>=? 3
+    zinterstore "{1}key'" ["{1}k1","{1}k2"] Sum                >>=? 1
+    zinterstoreWeights "{1}key'" [("{1}k1",1),("{1}k2",2)] Max >>=? 1
+    zunionstore "{1}key'" ["{1}k1","{1}k2"] Sum                >>=? 3
+    zunionstoreWeights "{1}key'" [("{1}k1",1),("{1}k2",2)] Min >>=? 3
 
 ------------------------------------------------------------------------------
 -- HyperLogLog
@@ -658,11 +658,11 @@ testScans = testCase "scans" $ do
 testZrangelex ::Test
 testZrangelex = testCase "zrangebylex" $ do
     let testSet = [(10, "aaa"), (10, "abb"), (10, "ccc"), (10, "ddd")]
-    zadd "zrangebylex" testSet                          >>=? 4
-    zrangebylex "zrangebylex" (Incl "aaa") (Incl "bbb") >>=? ["aaa","abb"]
-    zrangebylex "zrangebylex" (Excl "aaa") (Excl "ddd") >>=? ["abb","ccc"]
-    zrangebylex "zrangebylex" Minr Maxr                 >>=? ["aaa","abb","ccc","ddd"]
-    zrangebylexLimit "zrangebylex" Minr Maxr 2 1        >>=? ["ccc"]
+    zadd "key" testSet                          >>=? 4
+    zrangebylex "key" (Incl "aaa") (Incl "bbb") >>=? ["aaa","abb"]
+    zrangebylex "key" (Excl "aaa") (Excl "ddd") >>=? ["abb","ccc"]
+    zrangebylex "key" Minr Maxr                 >>=? ["aaa","abb","ccc","ddd"]
+    zrangebylexLimit "key" Minr Maxr 2 1        >>=? ["ccc"]
 
 testXAddRead ::Test
 testXAddRead = testCase "xadd/xread" $ do
