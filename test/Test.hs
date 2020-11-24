@@ -581,16 +581,8 @@ testSelect = testCase "select" $ do
 --
 testsServer :: [Test]
 testsServer =
-    [testServer, testBgrewriteaof, testFlushall, testInfo
+    [testBgrewriteaof, testFlushall, testInfo
     ,testSlowlog, testDebugObject]
-
-testServer :: Test
-testServer = testCase "server" $ do
-    time >>= \case
-      Right (_,_) -> return ()
-      Left _ -> error "error"
-    slaveof "no" "one" >>=? Ok
-    return ()
 
 testBgrewriteaof :: Test
 testBgrewriteaof = testCase "bgrewriteaof/bgsave/save" $ do
