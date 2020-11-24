@@ -312,12 +312,12 @@ testLists = testCase "lists" $ do
 
 testBpop :: Test
 testBpop = testCase "blocking push/pop" $ do
-    lpush "key" ["v3","v2","v1"] >>=? 3
-    blpop ["key"] 1              >>=? Just ("key","v1")
-    brpop ["key"] 1              >>=? Just ("key","v3")
-    rpush "k1" ["v1","v2"]       >>=? 2
-    brpoplpush "k1" "k2" 1       >>=? Just "v2"
-    rpoplpush "k1" "k2"          >>=? Just "v1"
+    lpush "{1}k3" ["v3","v2","v1"] >>=? 3
+    blpop ["{1}k3"] 1              >>=? Just ("{1}k3","v1")
+    brpop ["{1}k3"] 1              >>=? Just ("{1}k3","v3")
+    rpush "{1}k1" ["v1","v2"]       >>=? 2
+    brpoplpush "{1}k1" "{1}k2" 1       >>=? Just "v2"
+    rpoplpush "{1}k1" "{1}k2"          >>=? Just "v1"
 
 ------------------------------------------------------------------------------
 -- Sets
