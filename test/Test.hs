@@ -470,17 +470,17 @@ testTransaction :: Test
 testTransaction = testCase "transaction" $ do
     watch ["{1}k1", "{1}k2"] >>=? Ok
     unwatch            >>=? Ok
-    set "foo" "foo" >>= \case
+    set "{1}k1" "foo" >>= \case
       Left _ -> error "error"
       _ -> return ()
-    set "bar" "bar" >>= \case
+    set "{1}k2" "bar" >>= \case
       Left _ -> error "error"
       _ -> return ()
-    foobar <- multiExec $ do
-        foo <- get "foo"
-        bar <- get "bar"
-        return $ (,) <$> foo <*> bar
-    assert $ foobar == TxSuccess (Just "foo", Just "bar")
+    k1k2 <- multiExec $ do
+        k1 <- get "{1}k1"
+        k2 <- get "{1}k2"
+        return $ (,) <$> k1 <*> k2
+    assert $ k1k2 == TxSuccess (Just "foo", Just "bar")
 
 
 ------------------------------------------------------------------------------
