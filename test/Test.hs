@@ -68,7 +68,7 @@ assert = liftIO . HUnit.assert
 tests :: Connection -> [Test.Test]
 tests conn = map ($conn) $ concat
     [ testsMisc, testsKeys, testsStrings, [testHashes], testsLists, testsSets, [testHyperLogLog]
-    , testsZSets, [testPubSub], [testTransaction], [testScripting]
+    , testsZSets, [testTransaction], [testScripting]
     , testsServer, [testZrangelex]
     -- NOTE: not supported in a redis cluster
     -- , [testXAddRead, testXReadGroup, testXRange, testXpending, testXClaim, testXInfo, testXDel, testXTrim]
@@ -431,36 +431,6 @@ testHyperLogLog = testCase "hyperloglog" $ do
   pfcount ["{1}hll4"] >>=? 6
   -- test union cardinality
   pfcount ["{1}hll2", "{1}hll3"] >>=? 6
-
-------------------------------------------------------------------------------
--- Pub/Sub
---
-testPubSub :: Test
-testPubSub conn = testCase "pubSub" go conn
-  where
-    go = do
-        -- producer
-        asyncProducer <- liftIO $ Async.async $ do
-            runRedis conn $ do
-                let t = 10^(5 :: Int)
-                liftIO $ threadDelay t
-                publish "chan1" "hello" >>=? 1
-                liftIO $ threadDelay t
-                publish "chan2" "world" >>=? 1
-            return ()
-
-        -- consumer
-        pubSub (subscribe ["chan1"]) $ \msg -> do
-            -- ready for a message
-            case msg of
-                Message{..} -> return
-                    (unsubscribe [msgChannel] `mappend` psubscribe ["chan*"])
-                PMessage{..} -> return (punsubscribe [msgPattern])
-
-        pubSub (subscribe [] `mappend` psubscribe []) $ \_ -> do
-            liftIO $ HUnit.assertFailure "no subs: should return immediately"
-            undefined
-        liftIO $ Async.wait asyncProducer
 
 
 ------------------------------------------------------------------------------
