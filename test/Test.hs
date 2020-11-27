@@ -145,7 +145,6 @@ testKeys = testCase "keys" $ do
     set "{9}key" "value"     >>=? Ok
     get "{9}key"             >>=? Just "value"
     exists "{9}key"          >>=? True
-    keys "{9}k*"            >>=? ["{9}key"]
     -- NOTE randomkey, move and select can't be tested in a cluster
     -- randomkey             >>=? Just "key"
     -- move "{9}key" 13         >>=? True
