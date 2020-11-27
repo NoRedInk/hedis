@@ -69,7 +69,7 @@ tests :: Connection -> [Test.Test]
 tests conn = map ($conn) $ concat
     [ testsMisc, testsKeys, testsStrings, [testHashes], testsLists, testsSets, [testHyperLogLog]
     , testsZSets, [testPubSub], [testTransaction], [testScripting]
-    , testsServer, [testScans], [testZrangelex]
+    , testsServer, [testZrangelex]
     -- NOTE: not supported in a redis cluster
     -- , [testXAddRead, testXReadGroup, testXRange, testXpending, testXClaim, testXInfo, testXDel, testXTrim]
     , testPubSubThreaded
@@ -633,21 +633,6 @@ testDebugObject = testCase "debugObject/debugSegfault" $ do
       Left _ -> error "error"
       _ -> return ()
     return ()
-
-testScans :: Test
-testScans = testCase "scans" $ do
-    set "key" "value"       >>=? Ok
-    scan cursor0            >>=? (cursor0, ["key"])
-    scanOpts cursor0 sOpts1 >>=? (cursor0, ["key"])
-    scanOpts cursor0 sOpts2 >>=? (cursor0, [])
-    sadd "set" ["1"]        >>=? 1
-    sscan "set" cursor0     >>=? (cursor0, ["1"])
-    hset "hash" "k" "v"     >>=? True
-    hscan "hash" cursor0    >>=? (cursor0, [("k", "v")])
-    zadd "zset" [(42, "2")] >>=? 1
-    zscan "zset" cursor0    >>=? (cursor0, [("2", 42)])
-    where sOpts1 = defaultScanOpts { scanMatch = Just "k*" }
-          sOpts2 = defaultScanOpts { scanMatch = Just "not*"}
 
 testZrangelex ::Test
 testZrangelex = testCase "zrangebylex" $ do
