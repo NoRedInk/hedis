@@ -42,19 +42,20 @@ module Database.Redis.Sentinel
   ) where
 
 import           Control.Concurrent
-import           Control.Exception     (Exception, IOException, evaluate, throwIO)
+import           Control.Exception      (Exception, IOException, evaluate, throwIO)
 import           Control.Monad
-import           Control.Monad.Catch   (Handler (..), MonadCatch, catches, throwM)
+import           Control.Monad.Catch    (Handler (..), MonadCatch, catches, throwM)
 import           Control.Monad.Except
-import           Data.ByteString       (ByteString)
-import qualified Data.ByteString       as BS
-import qualified Data.ByteString.Char8 as BS8
-import           Data.Foldable         (toList)
-import           Data.List             (delete)
-import           Data.List.NonEmpty    (NonEmpty (..))
-import           Data.Typeable         (Typeable)
+import           Control.Monad.IO.Class (liftIO)
+import           Data.ByteString        (ByteString)
+import qualified Data.ByteString        as BS
+import qualified Data.ByteString.Char8  as BS8
+import           Data.Foldable          (toList)
+import           Data.List              (delete)
+import           Data.List.NonEmpty     (NonEmpty (..))
+import           Data.Typeable          (Typeable)
 import           Data.Unique
-import           Network.Socket        (HostName)
+import           Network.Socket         (HostName)
 
 import           Database.Redis hiding (Connection, connect, runRedis)
 import qualified Database.Redis as Redis
