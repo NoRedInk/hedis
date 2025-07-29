@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-25.05";
     flake-parts.url = "github:hercules-ci/flake-parts";
     haskell-flake.url = "github:srid/haskell-flake";
     system.url = "github:nix-systems/default";
@@ -25,7 +25,7 @@
           services.redis."redis".enable = true;
         };
         haskellProjects.default = {
-          basePackages = pkgs.haskell.packages.ghc947;
+          basePackages = pkgs.haskell.packages.ghc984;
           autoWire = [ "packages" ];
         };
         packages.default = self'.packages.hedis;
